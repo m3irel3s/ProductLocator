@@ -1,0 +1,12 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: productlocator-postgres
+    environment:
+      POSTGRES_USER: productlocator
+      POSTGRES_PASSWORD: productlocator
+      POSTGRES_DB: productlocator
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./infra/postgres:/var/lib/postgresql/data
