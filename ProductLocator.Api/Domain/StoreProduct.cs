@@ -10,6 +10,7 @@ public class StoreProduct
     public string? Shelf { get; set; }
 
     public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 
     public Store Store { get; set; } = null!;
     public Product Product { get; set; } = null!;

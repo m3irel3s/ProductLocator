@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using ProductLocator.Api.Services;
 using ProductLocator.Api.Data;
 
@@ -14,6 +13,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<StoreProductService>();
 
 var app = builder.Build();
 

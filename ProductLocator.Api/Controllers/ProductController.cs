@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
-using ProductLocator.Api.Dtos;
 using ProductLocator.Api.Services;
 
 namespace ProductLocator.Api.Controllers;
@@ -8,53 +6,66 @@ namespace ProductLocator.Api.Controllers;
 [Route("api/products")]
 public class ProductController : ControllerBase
 {
-    private readonly ProductService _productService;
+    private readonly ProductService _service;
 
     public ProductController(ProductService productService)
     {
-        _productService = productService;
+        _service = productService;
     }
 
-    [HttpPost]
-    public IActionResult CreateProduct(CreateProductRequest request)
+    [HttpGet]
+    public async Task<IActionResult> GetProducts()
     {
-        var product = _productService.CreateProduct(request);
+        var products = await _service.GetAllProductsAsync();
+        if (products == null) return NotFound();
 
-        var response = new ProductResponse(
+        var response = products.Select(product => new ProductResponse(
             product.Id,
             product.Name,
-            product.CreatedAt
-        );
+            product.Barcode,
+            product.CreatedAt,
+            product.UpdatedAt
+        ));
 
-        return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, response);
+        return Ok(response);
     }
 
-    [HttpGet("{id}")]
-    public IActionResult GetProduct(Guid id)
+    [HttpGet("{productId:guid}")]
+    public async Task<IActionResult> GetProduct(Guid productId)
     {
-        var product = _productService.GetProduct(id);
+        var product = await _service.GetProductByIdAsync(productId);
         if (product == null) return NotFound();
 
         var response = new ProductResponse(
             product.Id,
             product.Name,
-            product.CreatedAt
+            product.Barcode,
+            product.CreatedAt,
+            product.UpdatedAt
         );
 
         return Ok(response);
     }
 
-    [HttpGet]
-    public IActionResult GetAllProdcuts()
+    [HttpPost]
+    public async Task<ActionResult<ProductResponse>> CreateProduct(
+        CreateProductRequest req)
     {
-        var products = _productService.GetAllProducts();
+        var product = await _service.CreateProductAsync(req);
 
-        var response = products.Select(product => new ProductResponse(
+        var response = new ProductResponse(
             product.Id,
             product.Name,
-            product.CreatedAt
-        ));
+            product.Barcode,
+            product.CreatedAt,
+            product.UpdatedAt
+        );
 
-        return Ok(response);
+        return CreatedAtAction(
+            nameof(GetProduct),
+            new { productId = product.Id },
+            response
+        );
     }
+
 }

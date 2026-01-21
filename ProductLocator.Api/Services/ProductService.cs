@@ -1,32 +1,44 @@
-using ProductLocator.Api.Domain;
-using ProductLocator.Api.Dtos;
+using ProductLocator.Api.Data;
 
 namespace ProductLocator.Api.Services;
 
 public class ProductService
 {
-    private readonly List<Product> _products = new();
+    public readonly AppDbContext _db;
 
-    public Product CreateProduct(CreateProductRequest request)
+    public ProductService(AppDbContext dbContext)
     {
+        _db = dbContext;
+    }
+
+    public async Task<IEnumerable<Product>> GetAllProductsAsync()
+    {
+        return await _db.Products.ToListAsync();
+    }
+
+    public async Task<Product?> GetProductByIdAsync(Guid productId)
+    {
+        return await _db.Products.FindAsync(productId);
+    }
+
+    public async Task<Product> CreateProductAsync(CreateProductRequest req)
+    {
+        var existingProduct = await _db.Products.AnyAsync(x => x.Barcode == req.Barcode);
+        if (existingProduct)
+            throw new Exception("Product with the same barcode already exists");
+
         var product = new Product
         {
             Id = Guid.NewGuid(),
-            Name = request.Name,
-            CreatedAt = DateTime.UtcNow
+            Name = req.Name,
+            Barcode = req.Barcode,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
 
-        _products.Add(product);
+        _db.Products.Add(product);
+        await _db.SaveChangesAsync();
+
         return product;
-    }
-
-    public Product? GetProduct(Guid id)
-    {
-        return _products.FirstOrDefault(p => p.Id == id);
-    }
-
-    public List<Product> GetAllProducts()
-    {
-        return _products;
     }
 }

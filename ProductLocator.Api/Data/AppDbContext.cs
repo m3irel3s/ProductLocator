@@ -36,9 +36,9 @@ public class AppDbContext : DbContext
             e.Property(x => x.Role).IsRequired();
 
             e.HasOne(x => x.User)
-            .WithMany()
-            .HasForeignKey(x => x.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // stores
@@ -60,14 +60,14 @@ public class AppDbContext : DbContext
             e.Property(x => x.CreatedAt).IsRequired();
 
             e.HasOne(x => x.Store)
-            .WithMany(x => x.StoreMembers)
-            .HasForeignKey(x => x.StoreId)
-            .OnDelete(DeleteBehavior.Cascade);
+                .WithMany(x => x.StoreMembers)
+                .HasForeignKey(x => x.StoreId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             e.HasOne(x => x.User)
-            .WithMany()
-            .HasForeignKey(x => x.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // products
@@ -76,6 +76,7 @@ public class AppDbContext : DbContext
             e.ToTable("Products");
             e.HasKey(x => x.Id);
             e.Property(x => x.Name).IsRequired();
+            e.Property(x => x.Barcode).IsRequired();
             e.Property(x => x.CreatedAt).IsRequired();
             e.Property(x => x.UpdatedAt).IsRequired();
         });
@@ -87,16 +88,17 @@ public class AppDbContext : DbContext
             e.HasKey(x => new { x.StoreId, x.ProductId });
             e.Property(x => x.Price).IsRequired();
             e.Property(x => x.CreatedAt).IsRequired();
+            e.Property(x => x.UpdatedAt).IsRequired();
 
             e.HasOne(x => x.Store)
-            .WithMany(x => x.StoreProducts)
-            .HasForeignKey(x => x.StoreId)
-            .OnDelete(DeleteBehavior.Cascade);
+                .WithMany(x => x.StoreProducts)
+                .HasForeignKey(x => x.StoreId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             e.HasOne(x => x.Product)
-            .WithMany(x => x.StoreProducts)
-            .HasForeignKey(x => x.ProductId)
-            .OnDelete(DeleteBehavior.Cascade);
+                .WithMany(x => x.StoreProducts)
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // audit logs
@@ -108,14 +110,14 @@ public class AppDbContext : DbContext
             e.Property(x => x.CreatedAt).IsRequired();
 
             e.HasOne(x => x.ActorUser)
-            .WithMany()
-            .HasForeignKey(x => x.ActorUserId)
-            .OnDelete(DeleteBehavior.Cascade);
+                .WithMany()
+                .HasForeignKey(x => x.ActorUserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             e.HasOne(x => x.Store)
-            .WithMany()
-            .HasForeignKey(x => x.StoreId)
-            .OnDelete(DeleteBehavior.Cascade);
+                .WithMany()
+                .HasForeignKey(x => x.StoreId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
