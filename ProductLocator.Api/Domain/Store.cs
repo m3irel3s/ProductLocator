@@ -2,7 +2,7 @@ namespace ProductLocator.Api.Domain;
 
 public class Store
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
     public string Name { get; set; } = null!;
     public string Location { get; set; } = null!;
     public DateTime CreatedAt { get; set; }

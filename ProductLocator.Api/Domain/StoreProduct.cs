@@ -2,8 +2,8 @@ namespace ProductLocator.Api.Domain;
 
 public class StoreProduct
 {
-    public Guid StoreId { get; set; }
-    public Guid ProductId { get; set; }
+    public int StoreId { get; set; }
+    public int ProductId { get; set; }
 
     public decimal Price { get; set; }
     public string? Aisle { get; set; }

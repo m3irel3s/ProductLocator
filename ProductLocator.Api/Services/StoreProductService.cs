@@ -1,3 +1,4 @@
+using AutoMapper;
 using ProductLocator.Api.Data;
 
 namespace ProductLocator.Api.Services;
@@ -6,53 +7,101 @@ public class StoreProductService
 {
     public readonly AppDbContext _db;
 
-    public StoreProductService(AppDbContext dbContext)
+    private readonly IMapper _mapper;
+
+    public StoreProductService(AppDbContext dbContext, IMapper mapper)
     {
         _db = dbContext;
+        _mapper = mapper;
     }
 
-    public async Task<StoreProduct?> GetStoreProductAsync(Guid storeId, Guid productId)
+    public async Task<ServiceResponse<IEnumerable<StoreProductResponse>>> GetAllStoreProductsAsync(int storeId)
     {
-        return await _db.StoreProducts
-            .Include(x => x.Store)
-            .Include(x => x.Product)
-            .FirstOrDefaultAsync(sp => sp.StoreId == storeId && sp.ProductId == productId);
+        try
+        {
+            var storeProducts = await _db.StoreProducts
+                .Where(sp => sp.StoreId == storeId)
+                .ToListAsync();
+
+            if (!storeProducts.Any())
+            {
+                return ServiceResponse.Ok(
+                    Enumerable.Empty<StoreProductResponse>(),
+                     "No store products found");
+            }
+
+            var data = _mapper.Map<IEnumerable<StoreProductResponse>>(storeProducts);
+            return ServiceResponse.Ok(data);
+        }
+        catch (Exception ex)
+        {
+            return ServiceResponse.Fail<IEnumerable<StoreProductResponse>>(ex.Message, 500);
+        }
     }
 
+    public async Task<ServiceResponse<StoreProductResponse>> GetStoreProductAsync(int storeId, int productId)
+    {
+        try
+        {
+            var storeProduct = await _db.StoreProducts.FindAsync(storeId, productId);
+            if (storeProduct == null)
+            {
+                return ServiceResponse.Fail<StoreProductResponse>("Store product not found", 404);
+            }
 
-    public async Task<StoreProduct> CreateStoreProductAsync(
-        Guid storeId,
+            var data = _mapper.Map<StoreProductResponse>(storeProduct);
+            return ServiceResponse.Ok(data);
+        }
+        catch (Exception ex)
+        {
+            return ServiceResponse.Fail<StoreProductResponse>(ex.Message, 500);
+        }
+    }
+
+    public async Task<ServiceResponse<StoreProductResponse>> CreateStoreProductAsync(
+        int storeId,
         CreateStoreProductRequest req)
     {
-        // var store = await _db.Stores.FindAsync(storeId);
-        // if (store == null)
-        //     throw new Exception("Store not found");
-
-        var product = await _db.Products.FindAsync(req.ProductId);
-        if (product == null)
-            throw new Exception("Product not found");
-
-        var existingStoreProduct = await _db.StoreProducts.FindAsync(storeId, req.ProductId);
-        if (existingStoreProduct != null)
-            throw new Exception("Product already exists in store");
-
-        var storeProduct = new StoreProduct
+        try
         {
-            StoreId = storeId,
-            ProductId = req.ProductId,
-            Price = req.Price,
-            Aisle = req.Aisle,
-            Shelf = req.Shelf,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+            var store = await _db.Stores.FindAsync(storeId);
+            if (store == null)
+            {
+                return ServiceResponse.Fail<StoreProductResponse>("Store not found", 404);
+            }
 
-        _db.StoreProducts.Add(storeProduct);
-        await _db.SaveChangesAsync();
+            var product = await _db.Products.FindAsync(req.ProductId);
+            if (product == null)
+            {
+                return ServiceResponse.Fail<StoreProductResponse>("Product not found", 404);
+            }
 
-        return await _db.StoreProducts
-            .Include(x => x.Store)
-            .Include(x => x.Product)
-            .FirstAsync(x => x.StoreId == storeId && x.ProductId == req.ProductId);
+            var existingStoreProduct = await _db.StoreProducts.FindAsync(storeId, req.ProductId);
+            if (existingStoreProduct != null)
+            {
+                return ServiceResponse.Fail<StoreProductResponse>("Store product already exists", 400);
+            }
+
+            var storeProduct = new StoreProduct
+            {
+                StoreId = storeId,
+                ProductId = req.ProductId,
+                Price = req.Price,
+                Aisle = req.Aisle,
+                Shelf = req.Shelf,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            _db.StoreProducts.Add(storeProduct);
+            await _db.SaveChangesAsync();
+
+            var data = _mapper.Map<StoreProductResponse>(storeProduct);
+            return ServiceResponse.Created(data, "Store product created successfully");
+        }
+        catch (Exception ex)
+        {
+            return ServiceResponse.Fail<StoreProductResponse>(ex.Message, 500);
+        }
     }
 }

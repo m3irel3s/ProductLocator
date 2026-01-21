@@ -1,6 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using ProductLocator.Api.Domain;
-
 namespace ProductLocator.Api.Data;
 
 public class AppDbContext : DbContext
@@ -20,7 +17,7 @@ public class AppDbContext : DbContext
         // users
         modelBuilder.Entity<User>(e =>
         {
-            e.ToTable("Users");
+            e.ToTable("users");
             e.HasKey(x => x.Id);
             e.Property(x => x.Email).IsRequired();
             e.HasIndex(x => x.Email).IsUnique();
@@ -31,7 +28,7 @@ public class AppDbContext : DbContext
         // user global roles
         modelBuilder.Entity<UserGlobalRole>(e =>
         {
-            e.ToTable("UserGlobalRoles");
+            e.ToTable("user_global_roles");
             e.HasKey(x => new { x.UserId, x.Role });
             e.Property(x => x.Role).IsRequired();
 
@@ -44,7 +41,7 @@ public class AppDbContext : DbContext
         // stores
         modelBuilder.Entity<Store>(e =>
         {
-            e.ToTable("Stores");
+            e.ToTable("stores");
             e.HasKey(x => x.Id);
             e.Property(x => x.Name).IsRequired();
             e.Property(x => x.CreatedAt).IsRequired();
@@ -54,7 +51,7 @@ public class AppDbContext : DbContext
         // store members
         modelBuilder.Entity<StoreMember>(e =>
         {
-            e.ToTable("StoreMembers");
+            e.ToTable("store_members");
             e.HasKey(x => new { x.StoreId, x.UserId });
             e.Property(x => x.Role).IsRequired();
             e.Property(x => x.CreatedAt).IsRequired();
@@ -73,10 +70,10 @@ public class AppDbContext : DbContext
         // products
         modelBuilder.Entity<Product>(e =>
         {
-            e.ToTable("Products");
+            e.ToTable("products");
             e.HasKey(x => x.Id);
             e.Property(x => x.Name).IsRequired();
-            e.Property(x => x.Barcode).IsRequired();
+            e.HasIndex(x => x.Barcode).IsUnique();
             e.Property(x => x.CreatedAt).IsRequired();
             e.Property(x => x.UpdatedAt).IsRequired();
         });
@@ -84,7 +81,7 @@ public class AppDbContext : DbContext
         // store products
         modelBuilder.Entity<StoreProduct>(e =>
         {
-            e.ToTable("StoreProducts");
+            e.ToTable("store_products");
             e.HasKey(x => new { x.StoreId, x.ProductId });
             e.Property(x => x.Price).IsRequired();
             e.Property(x => x.CreatedAt).IsRequired();
@@ -104,7 +101,7 @@ public class AppDbContext : DbContext
         // audit logs
         modelBuilder.Entity<AuditLog>(e =>
         {
-            e.ToTable("AuditLogs");
+            e.ToTable("audit_logs");
             e.HasKey(x => x.Id);
             e.Property(x => x.Action).IsRequired();
             e.Property(x => x.CreatedAt).IsRequired();

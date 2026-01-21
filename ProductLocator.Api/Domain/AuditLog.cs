@@ -2,9 +2,9 @@ namespace ProductLocator.Api.Domain;
 
 public class AuditLog
 {
-    public Guid Id { get; set; }
-    public Guid? ActorUserId { get; set; }
-    public Guid? StoreId { get; set; }
+    public int Id { get; set; }
+    public int? ActorUserId { get; set; }
+    public int? StoreId { get; set; }
     public string Action { get; set; } = null!;
     public string? Data { get; set; }
     public DateTime CreatedAt { get; set; }

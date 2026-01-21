@@ -13,7 +13,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<StoreService>();
 builder.Services.AddScoped<StoreProductService>();
+
+builder.Services.AddAutoMapper(typeof(Program));
+
 
 var app = builder.Build();
 
