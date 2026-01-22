@@ -15,6 +15,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<StoreService>();
 builder.Services.AddScoped<StoreProductService>();
+builder.Services.AddScoped<StoreAisleService>();
 
 builder.Services.AddAutoMapper(typeof(Program));
 

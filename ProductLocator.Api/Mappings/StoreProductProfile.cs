@@ -7,6 +7,7 @@ public class StoreProductProfile : Profile
         CreateMap<StoreProduct, StoreProductResponse>()
             .ForCtorParam("StoreName", o => o.MapFrom(x => x.Store.Name))
             .ForCtorParam("ProductName", o => o.MapFrom(x => x.Product.Name))
-            .ForCtorParam("ProductBarcode", o => o.MapFrom(x => x.Product.Barcode));
+            .ForCtorParam("ProductBarcode", o => o.MapFrom(x => x.Product.Barcode))
+            .ForCtorParam("AisleId", o => o.MapFrom(x => x.AisleId));
     }
 }

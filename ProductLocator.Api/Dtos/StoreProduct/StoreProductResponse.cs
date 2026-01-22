@@ -7,8 +7,8 @@ public record StoreProductResponse(
     string ProductName,
     string ProductBarcode,
     decimal Price,
-    string? Aisle,
-    string? Shelf,
+    int? AisleId,
+    int? ShelfNumber,
     DateTime CreatedAt,
     DateTime UpdatedAt
 );

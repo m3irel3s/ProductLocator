@@ -60,6 +60,13 @@ public class StoreService
     {
         try
         {
+            var existingStore = await _db.Stores
+                .FirstOrDefaultAsync(s => s.Name == req.Name && s.Location == req.Location);
+            if (existingStore != null)
+            {
+                return ServiceResponse.Fail<StoreResponse>("Store with the same name and location already exists",400);
+            }
+
             var store = new Store
             {
                 Name = req.Name,

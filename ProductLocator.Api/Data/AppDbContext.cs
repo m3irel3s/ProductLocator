@@ -11,6 +11,7 @@ public class AppDbContext : DbContext
     public DbSet<Product> Products { get; set; } = null!;
     public DbSet<StoreProduct> StoreProducts { get; set; } = null!;
     public DbSet<AuditLog> AuditLogs { get; set; } = null!;
+    public DbSet<StoreAisle> StoreAisles { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -23,6 +24,7 @@ public class AppDbContext : DbContext
             e.HasIndex(x => x.Email).IsUnique();
             e.Property(x => x.PasswordHash).IsRequired();
             e.Property(x => x.CreatedAt).IsRequired();
+            e.Property(x => x.UpdatedAt).IsRequired();
         });
 
         // user global roles
@@ -31,6 +33,8 @@ public class AppDbContext : DbContext
             e.ToTable("user_global_roles");
             e.HasKey(x => new { x.UserId, x.Role });
             e.Property(x => x.Role).IsRequired();
+            e.Property(x => x.CreatedAt).IsRequired();
+            e.Property(x => x.UpdatedAt).IsRequired();
 
             e.HasOne(x => x.User)
                 .WithMany()
@@ -44,6 +48,7 @@ public class AppDbContext : DbContext
             e.ToTable("stores");
             e.HasKey(x => x.Id);
             e.Property(x => x.Name).IsRequired();
+            e.Property(x => x.Location).IsRequired();
             e.Property(x => x.CreatedAt).IsRequired();
             e.Property(x => x.UpdatedAt).IsRequired();
         });
@@ -55,6 +60,7 @@ public class AppDbContext : DbContext
             e.HasKey(x => new { x.StoreId, x.UserId });
             e.Property(x => x.Role).IsRequired();
             e.Property(x => x.CreatedAt).IsRequired();
+            e.Property(x => x.UpdatedAt).IsRequired();
 
             e.HasOne(x => x.Store)
                 .WithMany(x => x.StoreMembers)
@@ -86,6 +92,13 @@ public class AppDbContext : DbContext
             e.Property(x => x.Price).IsRequired();
             e.Property(x => x.CreatedAt).IsRequired();
             e.Property(x => x.UpdatedAt).IsRequired();
+            e.Property(x => x.AisleId).IsRequired(false);
+            e.Property(x => x.ShelfNumber).IsRequired(false);
+
+            e.HasOne(x => x.Aisle)
+                .WithMany(a => a.StoreProducts)
+                .HasForeignKey(x => x.AisleId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             e.HasOne(x => x.Store)
                 .WithMany(x => x.StoreProducts)
@@ -96,6 +109,25 @@ public class AppDbContext : DbContext
                 .WithMany(x => x.StoreProducts)
                 .HasForeignKey(x => x.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // store aisles
+        modelBuilder.Entity<StoreAisle>(e =>
+        {
+            e.ToTable("store_aisles");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Name).IsRequired();
+            e.Property(x => x.MaxShelf).IsRequired();
+            e.Property(x => x.CreatedAt).IsRequired();
+            e.Property(x => x.UpdatedAt).IsRequired();
+
+            e.HasIndex(x => new { x.StoreId, x.Name }).IsUnique();
+
+            e.HasOne(x => x.Store)
+                .WithMany(x => x.Aisles)
+                .HasForeignKey(x => x.StoreId)
+                .OnDelete(DeleteBehavior.Cascade);
+
         });
 
         // audit logs

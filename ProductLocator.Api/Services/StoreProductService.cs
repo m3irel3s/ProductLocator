@@ -87,8 +87,8 @@ public class StoreProductService
                 StoreId = storeId,
                 ProductId = req.ProductId,
                 Price = req.Price,
-                Aisle = req.Aisle,
-                Shelf = req.Shelf,
+                AisleId = req.AisleId,
+                ShelfNumber = req.ShelfNumber,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
