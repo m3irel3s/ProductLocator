@@ -13,8 +13,7 @@ Thumbs.db
 **/appsettings.Development.json
 
 # Docker / Postgres volumes
-infra/**/pgdata/
-infra/**/data/
+infra/postgres/pgdata/
 
 # EF Core
 **/Migrations/*
