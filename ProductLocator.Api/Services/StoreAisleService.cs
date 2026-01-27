@@ -93,7 +93,7 @@ public class StoreAisleService
             await _db.SaveChangesAsync();
 
             var data = _mapper.Map<StoreAisleResponse>(storeAisle);
-            return ServiceResponse.Ok(data, "Store aisle created successfully");
+            return ServiceResponse.Created(data, "Store aisle created successfully");
         }
         catch (Exception ex)
         {

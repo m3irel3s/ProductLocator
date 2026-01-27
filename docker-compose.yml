@@ -1,12 +1,28 @@
 services:
-  postgres:
+  postgres-dev:
     image: postgres:16
-    container_name: productlocator-postgres
+    container_name: productlocator-postgres-dev
     environment:
       POSTGRES_USER: productlocator
       POSTGRES_PASSWORD: productlocator
-      POSTGRES_DB: productlocator
+      POSTGRES_DB: productlocator_dev
     ports:
       - "5432:5432"
     volumes:
-      - ./infra/postgres/pgdata:/var/lib/postgresql/data
+      - productlocator_pgdata_dev:/var/lib/postgresql/data
+
+  postgres-test:
+    image: postgres:16
+    container_name: productlocator-postgres-test
+    environment:
+      POSTGRES_USER: productlocator
+      POSTGRES_PASSWORD: productlocator
+      POSTGRES_DB: productlocator_test
+    ports:
+      - "5433:5432"
+    volumes:
+      - productlocator_pgdata_test:/var/lib/postgresql/data
+
+volumes:
+  productlocator_pgdata_dev:
+  productlocator_pgdata_test:

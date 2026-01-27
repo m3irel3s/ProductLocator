@@ -62,8 +62,9 @@ public class ProductService
             var exists = await _db.Products.AnyAsync(p => p.Barcode == req.Barcode);
             if (exists)
             {
-                return ServiceResponse.Fail<ProductResponse>("Product with the same barcode already exists", 400);
+                return ServiceResponse.Fail<ProductResponse>("Product with the same barcode already exists", 409);
             }
+
             var product = new Product
             {
                 Name = req.Name,
