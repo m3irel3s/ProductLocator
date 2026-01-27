@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
+
 namespace ProductLocator.Api.IntegrationTests.Helpers;
 
 public class ApiClient
@@ -14,8 +14,8 @@ public class ApiClient
         if (res.StatusCode != HttpStatusCode.Created)
             throw new Exception(await res.Content.ReadAsStringAsync());
 
-        using var doc = JsonDocument.Parse(await res.Content.ReadAsStringAsync());
-        return doc.RootElement.GetProperty("data").GetProperty("id").GetInt32();
+        var store = await res.Content.ReadFromJsonAsync<StoreResponse>();
+        return store!.Id;
     }
 
     public async Task<int> CreateProductAsync(string name, string barcode)
@@ -24,8 +24,8 @@ public class ApiClient
         if (res.StatusCode != HttpStatusCode.Created)
             throw new Exception(await res.Content.ReadAsStringAsync());
 
-        using var doc = JsonDocument.Parse(await res.Content.ReadAsStringAsync());
-        return doc.RootElement.GetProperty("data").GetProperty("id").GetInt32();
+        var product = await res.Content.ReadFromJsonAsync<ProductResponse>();
+        return product!.Id;
     }
 
     public async Task<int> CreateStoreAisleAsync(int storeId, string name, int maxShelf)
@@ -34,8 +34,8 @@ public class ApiClient
         if (res.StatusCode != HttpStatusCode.Created && res.StatusCode != HttpStatusCode.OK)
             throw new Exception(await res.Content.ReadAsStringAsync());
 
-        using var doc = JsonDocument.Parse(await res.Content.ReadAsStringAsync());
-        return doc.RootElement.GetProperty("data").GetProperty("id").GetInt32();
+        var storeAisle = await res.Content.ReadFromJsonAsync<StoreAisleResponse>();
+        return storeAisle!.Id;
     }
 
     public async Task<HttpResponseMessage> CreateStoreProductAsync(

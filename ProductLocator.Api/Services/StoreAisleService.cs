@@ -1,12 +1,10 @@
-using AutoMapper;
 using ProductLocator.Api.Data;
 
 namespace ProductLocator.Api.Services;
 
 public class StoreAisleService
 {
-    public readonly AppDbContext _db;
-
+    private readonly AppDbContext _db;
     private readonly IMapper _mapper;
 
     public StoreAisleService(AppDbContext dbContext, IMapper mapper)
@@ -15,89 +13,67 @@ public class StoreAisleService
         _mapper = mapper;
     }
 
-    public async Task<ServiceResponse<IEnumerable<StoreAisleResponse>>> GetAllStoreAislesAsync(int storeId)
+    private async Task EnsureStoreExistsAsync(int storeId)
     {
-        try
+        var store = await _db.Stores.FindAsync(storeId);
+        if (store == null)
         {
-            var storeAisles = await _db.StoreAisles
-                .Where(sa => sa.StoreId == storeId)
-                .ToListAsync();
-
-            if (!storeAisles.Any())
-            {
-                return ServiceResponse.Ok(
-                    Enumerable.Empty<StoreAisleResponse>(),
-                     "No store aisles found");
-            }
-
-            var data = _mapper.Map<IEnumerable<StoreAisleResponse>>(storeAisles);
-            return ServiceResponse.Ok(data);
-        }
-        catch (Exception ex)
-        {
-            return ServiceResponse.Fail<IEnumerable<StoreAisleResponse>>(ex.Message, 500);
+            throw new NotFoundException("Store not found");
         }
     }
 
-    public async Task<ServiceResponse<StoreAisleResponse>> GetStoreAisleAsync(int storeId, int aisleId)
+    public async Task<IEnumerable<StoreAisleResponse>> GetStoreAislesAsync(int storeId)
     {
-        try
-        {
-            var storeAisle = await _db.StoreAisles
-                .Include(sa => sa.StoreProducts)
-                .FirstOrDefaultAsync(sa => sa.StoreId == storeId && sa.Id == aisleId);
+        await EnsureStoreExistsAsync(storeId);
 
-            if (storeAisle == null)
-            {
-                return ServiceResponse.Fail<StoreAisleResponse>("Store aisle not found", 404);
-            }
+        var storeAisles = await _db.StoreAisles
+            .Where(sa => sa.StoreId == storeId)
+            .ToListAsync();
 
-            var data = _mapper.Map<StoreAisleResponse>(storeAisle);
-            return ServiceResponse.Ok(data);
-        }
-        catch (Exception ex)
-        {
-            return ServiceResponse.Fail<StoreAisleResponse>(ex.Message, 500);
-        }
+        return _mapper.Map<IEnumerable<StoreAisleResponse>>(storeAisles);
     }
 
-    public async Task<ServiceResponse<StoreAisleResponse>> CreateStoreAisleAsync(
+    public async Task<StoreAisleResponse> GetStoreAisleAsync(int storeId, int aisleId)
+    {
+        await EnsureStoreExistsAsync(storeId);
+
+        var storeAisle = await _db.StoreAisles
+            .Include(sa => sa.StoreProducts)
+            .FirstOrDefaultAsync(sa => sa.StoreId == storeId && sa.Id == aisleId);
+
+        if (storeAisle == null)
+        {
+            throw new NotFoundException("Store aisle not found");
+        }
+
+        return _mapper.Map<StoreAisleResponse>(storeAisle);
+    }
+
+    public async Task<StoreAisleResponse> CreateStoreAisleAsync(
         int storeId,
         CreateStoreAisleRequest req)
     {
-        try
+        await EnsureStoreExistsAsync(storeId);
+
+        var existingStoreAisle = await _db.StoreAisles
+            .FirstOrDefaultAsync(sa => sa.StoreId == storeId && sa.Name == req.Name);
+        if (existingStoreAisle != null)
         {
-            var store = await _db.Stores.FindAsync(storeId);
-            if (store == null)
-            {
-                return ServiceResponse.Fail<StoreAisleResponse>("Store not found", 404);
-            }
-
-            var existingStoreAisle = await _db.StoreAisles
-                .FirstOrDefaultAsync(sa => sa.StoreId == storeId && sa.Name == req.Name);
-            if (existingStoreAisle != null)
-            {
-                return ServiceResponse.Fail<StoreAisleResponse>("Store aisle with the same name already exists", 400);
-            }
-
-            var storeAisle = new StoreAisle
-            {
-                StoreId = storeId,
-                Name = req.Name,
-                MaxShelf = req.MaxShelf,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-            };
-
-            _db.StoreAisles.Add(storeAisle);
-            await _db.SaveChangesAsync();
-
-            var data = _mapper.Map<StoreAisleResponse>(storeAisle);
-            return ServiceResponse.Created(data, "Store aisle created successfully");
+            throw new ConflictException("Store aisle with the same name already exists");
         }
-        catch (Exception ex)
+
+        var storeAisle = new StoreAisle
         {
-            return ServiceResponse.Fail<StoreAisleResponse>(ex.Message, 500);
-        }
+            StoreId = storeId,
+            Name = req.Name,
+            MaxShelf = req.MaxShelf,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+        };
+
+        _db.StoreAisles.Add(storeAisle);
+        await _db.SaveChangesAsync();
+
+        return _mapper.Map<StoreAisleResponse>(storeAisle);
     }
 }

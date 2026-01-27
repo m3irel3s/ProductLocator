@@ -1,13 +1,11 @@
-using AutoMapper;
 using ProductLocator.Api.Data;
 
 namespace ProductLocator.Api.Services;
 
 public class ProductService
 {
-    public readonly AppDbContext _db;
-
-    public readonly IMapper _mapper;
+    private readonly AppDbContext _db;
+    private readonly IMapper _mapper;
 
     public ProductService(AppDbContext dbContext, IMapper mapper)
     {
@@ -15,73 +13,43 @@ public class ProductService
         _mapper = mapper;
     }
 
-    public async Task<ServiceResponse<IEnumerable<ProductResponse>>> GetAllProductsAsync()
+    public async Task<IEnumerable<ProductResponse>> GetAllProductsAsync()
     {
-        try
-        {
-            var products = await _db.Products.ToListAsync();
-            if (!products.Any())
-            {
-                return ServiceResponse.Ok(
-                    Enumerable.Empty<ProductResponse>(),
-                     "No products found");
-            }
+        var products = await _db.Products.ToListAsync();
 
-            var data = _mapper.Map<IEnumerable<ProductResponse>>(products);
-            return ServiceResponse.Ok(data);
-        }
-        catch (Exception ex)
-        {
-            return ServiceResponse.Fail<IEnumerable<ProductResponse>>(ex.Message, 500);
-        }
+        return _mapper.Map<IEnumerable<ProductResponse>>(products);
     }
 
-    public async Task<ServiceResponse<ProductResponse>> GetProductByIdAsync(int productId)
+    public async Task<ProductResponse> GetProductByIdAsync(int productId)
     {
-        try
+        var product = await _db.Products.FindAsync(productId);
+        if (product == null)
         {
-            var product = await _db.Products.FindAsync(productId);
-            if (product == null)
-            {
-                return ServiceResponse.Fail<ProductResponse>("Product not found", 404);
-            }
+            throw new NotFoundException("Product not found");
+        }
 
-            var data = _mapper.Map<ProductResponse>(product);
-            return ServiceResponse.Ok(data);
-        }
-        catch (Exception ex)
-        {
-            return ServiceResponse.Fail<ProductResponse>(ex.Message, 500);
-        }
+        return _mapper.Map<ProductResponse>(product);
     }
 
-    public async Task<ServiceResponse<ProductResponse>> CreateProductAsync(CreateProductRequest req)
+    public async Task<ProductResponse> CreateProductAsync(CreateProductRequest req)
     {
-        try
+        var exists = await _db.Products.AnyAsync(p => p.Barcode == req.Barcode);
+        if (exists)
         {
-            var exists = await _db.Products.AnyAsync(p => p.Barcode == req.Barcode);
-            if (exists)
-            {
-                return ServiceResponse.Fail<ProductResponse>("Product with the same barcode already exists", 409);
-            }
-
-            var product = new Product
-            {
-                Name = req.Name,
-                Barcode = req.Barcode,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-
-            _db.Products.Add(product);
-            await _db.SaveChangesAsync();
-
-            var data = _mapper.Map<ProductResponse>(product);
-            return ServiceResponse.Created(data, "Product created successfully");
+            throw new ConflictException("Product with the same barcode already exists");
         }
-        catch (Exception ex)
+
+        var product = new Product
         {
-            return ServiceResponse.Fail<ProductResponse>(ex.Message, 500);
-        }
+            Name = req.Name,
+            Barcode = req.Barcode,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        _db.Products.Add(product);
+        await _db.SaveChangesAsync();
+
+        return _mapper.Map<ProductResponse>(product);
     }
 }

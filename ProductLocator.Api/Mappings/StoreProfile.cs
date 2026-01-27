@@ -1,4 +1,3 @@
-using AutoMapper;
 
 public class StoreProfile : Profile
 {

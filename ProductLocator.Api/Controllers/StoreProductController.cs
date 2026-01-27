@@ -8,32 +8,35 @@ public class StoreProductController : ControllerBase
 {
     private readonly StoreProductService _service;
 
-    public StoreProductController(StoreProductService storeProductService)
+    public StoreProductController(StoreProductService service)
     {
-        _service = storeProductService;
+        _service = service;
     }
 
     [HttpGet]
-    public async Task<ActionResult<ServiceResponse<IEnumerable<StoreProductResponse>>>> GetStoreProducts(int storeId)
+    public async Task<IActionResult> GetStoreProducts(int storeId)
     {
-        var result = await _service.GetAllStoreProductsAsync(storeId);
-        return StatusCode(result.StatusCode, result);
+        var storeProducts = await _service.GetAllStoreProductsAsync(storeId);
+        return Ok(storeProducts);
     }
 
     [HttpGet("{productId:int}")]
-    public async Task<ActionResult<ServiceResponse<StoreProductResponse>>> GetStoreProduct(
+    public async Task<IActionResult> GetStoreProduct(
         int storeId, int productId)
     {
-        var result = await _service.GetStoreProductAsync(storeId, productId);
-        return StatusCode(result.StatusCode, result);
+        var storeProduct = await _service.GetStoreProductAsync(storeId, productId);
+        return Ok(storeProduct);
     }
 
     [HttpPost]
-    public async Task<ActionResult<ServiceResponse<StoreProductResponse>>> CreateStoreProduct(
+    public async Task<IActionResult> CreateStoreProduct(
         int storeId,
         [FromBody] CreateStoreProductRequest req)
     {
-        var result = await _service.CreateStoreProductAsync(storeId, req);
-        return StatusCode(result.StatusCode, result);
+        var storeProduct = await _service.CreateStoreProductAsync(storeId, req);
+        return CreatedAtAction(
+            nameof(GetStoreProduct),
+            new { storeId = storeProduct.StoreId, productId = storeProduct.ProductId },
+            storeProduct);
     }
 }

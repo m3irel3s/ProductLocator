@@ -8,29 +8,32 @@ public class StoreAisleController : ControllerBase
 {
     private readonly StoreAisleService _service;
 
-    public StoreAisleController(StoreAisleService storeAisleService)
+    public StoreAisleController(StoreAisleService service)
     {
-        _service = storeAisleService;
+        _service = service;
     }
 
     [HttpGet]
-    public async Task<ActionResult<ServiceResponse<IEnumerable<StoreAisleResponse>>>> GetStoreAisles(int storeId)
+    public async Task<IActionResult> GetStoreAisles(int storeId)
     {
-        var result = await _service.GetAllStoreAislesAsync(storeId);
-        return StatusCode(result.StatusCode, result);
+        var aisles = await _service.GetStoreAislesAsync(storeId);
+        return Ok(aisles);
     }
 
     [HttpGet("{aisleId:int}")]
-    public async Task<ActionResult<ServiceResponse<StoreAisleResponse>>> GetStoreAisle(int storeId, int aisleId)
+    public async Task<IActionResult> GetStoreAisle(int storeId, int aisleId)
     {
-        var result = await _service.GetStoreAisleAsync(storeId, aisleId);
-        return StatusCode(result.StatusCode, result);
+        var aisle = await _service.GetStoreAisleAsync(storeId, aisleId);
+        return Ok(aisle);
     }
 
     [HttpPost]
-    public async Task<ActionResult<ServiceResponse<StoreAisleResponse>>> CreateStoreAisle(int storeId, CreateStoreAisleRequest req)
+    public async Task<IActionResult> CreateStoreAisle(int storeId, CreateStoreAisleRequest req)
     {
-        var result = await _service.CreateStoreAisleAsync(storeId, req);
-        return StatusCode(result.StatusCode, result);
+        var aisle = await _service.CreateStoreAisleAsync(storeId, req);
+        return CreatedAtAction(
+            nameof(GetStoreAisle),
+            new { storeId = storeId, aisleId = aisle.Id },
+            aisle);
     }
 }

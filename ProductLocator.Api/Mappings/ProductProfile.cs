@@ -1,4 +1,3 @@
-using AutoMapper;
 
 public class ProductProfile : Profile
 {

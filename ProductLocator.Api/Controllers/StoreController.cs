@@ -8,30 +8,33 @@ public class StoreController : ControllerBase
 {
     private readonly StoreService _service;
 
-    public StoreController(StoreService storeService)
+    public StoreController(StoreService service)
     {
-        _service = storeService;
+        _service = service;
     }
 
     [HttpGet]
-    public async Task<ActionResult<ServiceResponse<IEnumerable<StoreResponse>>>> GetStores()
+    public async Task<IActionResult> GetStores()
     {
-        var result = await _service.GetAllStoresAsync();
-        return StatusCode(result.StatusCode, result);
+        var stores = await _service.GetAllStoresAsync();
+        return Ok(stores);
     }
 
     [HttpGet("{storeId:int}")]
-    public async Task<ActionResult<ServiceResponse<StoreResponse>>> GetStore(int storeId)
+    public async Task<IActionResult> GetStore(int storeId)
     {
-        var result = await _service.GetStoreByIdAsync(storeId);
-        return StatusCode(result.StatusCode, result);
+        var store = await _service.GetStoreByIdAsync(storeId);
+        return Ok(store);
     }
 
     [HttpPost]
-    public async Task<ActionResult<ServiceResponse<StoreResponse>>> CreateStore(
+    public async Task<IActionResult> CreateStore(
         CreateStoreRequest req)
     {
-        var result = await _service.CreateStoreAsync(req);
-        return StatusCode(result.StatusCode, result);
+        var store = await _service.CreateStoreAsync(req);
+        return CreatedAtAction(
+            nameof(GetStore),
+            new { storeId = store.Id },
+            store);
     }
 }

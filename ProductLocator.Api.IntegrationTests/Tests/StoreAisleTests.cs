@@ -1,5 +1,4 @@
 
-
 [Collection("IntegrationTests")]
 public class StoreAisleTests : IAsyncLifetime
 {
@@ -28,6 +27,15 @@ public class StoreAisleTests : IAsyncLifetime
     {
         var res = await _http.GetAsync("/api/store/99999/aisle");
         Assert.Equal(HttpStatusCode.NotFound, res.StatusCode);
+    }
+
+    [Fact]
+    public async Task Get_all_store_aisles_returns_empty_when_none()
+    {
+        var storeId = await _api.CreateStoreAsync("Continente", "Lisboa");
+
+        var res = await _http.GetAsync($"/api/store/{storeId}/aisle");
+        Assert.Equal(HttpStatusCode.OK, res.StatusCode);
     }
 
     [Fact]

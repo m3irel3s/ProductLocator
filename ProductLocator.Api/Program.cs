@@ -1,5 +1,7 @@
 using ProductLocator.Api.Services;
 using ProductLocator.Api.Data;
+using ProductLocator.Api.Middleware;
+using ProductLocator.Api.Guards;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,11 +13,17 @@ builder.Services.AddControllers();
 
 builder.Services.AddSwaggerGen();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<StoreService>();
 builder.Services.AddScoped<StoreProductService>();
 builder.Services.AddScoped<StoreAisleService>();
+
+builder.Services.AddScoped<StoreGuard>();
+builder.Services.AddScoped<ProductGuard>();
+builder.Services.AddScoped<StoreProductGuard>();
 
 builder.Services.AddAutoMapper(typeof(Program));
 
@@ -29,6 +37,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseExceptionHandler();
 
 app.MapControllers();
 

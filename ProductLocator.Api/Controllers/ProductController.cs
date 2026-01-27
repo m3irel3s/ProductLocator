@@ -8,30 +8,33 @@ public class ProductController : ControllerBase
 {
     private readonly ProductService _service;
 
-    public ProductController(ProductService productService)
+    public ProductController(ProductService service)
     {
-        _service = productService;
+        _service = service;
     }
 
     [HttpGet]
-    public async Task<ActionResult<ServiceResponse<IEnumerable<ProductResponse>>>> GetProducts()
+    public async Task<IActionResult> GetProducts()
     {
-        var result = await _service.GetAllProductsAsync();
-        return StatusCode(result.StatusCode, result);
+        var products = await _service.GetAllProductsAsync();
+        return Ok(products);
     }
 
     [HttpGet("{productId:int}")]
-    public async Task<ActionResult<ServiceResponse<ProductResponse>>> GetProduct(int productId)
+    public async Task<IActionResult> GetProduct(int productId)
     {
-        var result = await _service.GetProductByIdAsync(productId);
-        return StatusCode(result.StatusCode, result);
+        var product = await _service.GetProductByIdAsync(productId);
+        return Ok(product);
     }
 
     [HttpPost]
-    public async Task<ActionResult<ServiceResponse<ProductResponse>>> CreateProduct(
+    public async Task<IActionResult> CreateProduct(
         CreateProductRequest req)
     {
-        var result = await _service.CreateProductAsync(req);
-        return StatusCode(result.StatusCode, result);
+        var product = await _service.CreateProductAsync(req);
+        return CreatedAtAction(
+            nameof(GetProduct),
+            new { productId = product.Id },
+            product);
     }
 }
