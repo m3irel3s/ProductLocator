@@ -24,6 +24,7 @@ builder.Services.AddScoped<StoreAisleService>();
 builder.Services.AddScoped<StoreGuard>();
 builder.Services.AddScoped<ProductGuard>();
 builder.Services.AddScoped<StoreProductGuard>();
+builder.Services.AddScoped<StoreAisleGuard>();
 
 builder.Services.AddAutoMapper(typeof(Program));
 

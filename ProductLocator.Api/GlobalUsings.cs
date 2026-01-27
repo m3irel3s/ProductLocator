@@ -10,4 +10,6 @@ global using ProductLocator.Api.Dtos.StoreProduct;
 global using ProductLocator.Api.Dtos.Store;
 global using ProductLocator.Api.Dtos.StoreAisle;
 
+global using ProductLocator.Api.Guards;
+
 global using AutoMapper;

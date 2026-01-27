@@ -6,11 +6,13 @@ public class ProductService
 {
     private readonly AppDbContext _db;
     private readonly IMapper _mapper;
+    private readonly ProductGuard _productGuard;
 
-    public ProductService(AppDbContext dbContext, IMapper mapper)
+    public ProductService(AppDbContext dbContext, IMapper mapper, ProductGuard productGuard)
     {
         _db = dbContext;
         _mapper = mapper;
+        _productGuard = productGuard;
     }
 
     public async Task<IEnumerable<ProductResponse>> GetAllProductsAsync()
@@ -33,11 +35,7 @@ public class ProductService
 
     public async Task<ProductResponse> CreateProductAsync(CreateProductRequest req)
     {
-        var exists = await _db.Products.AnyAsync(p => p.Barcode == req.Barcode);
-        if (exists)
-        {
-            throw new ConflictException("Product with the same barcode already exists");
-        }
+        await _productGuard.EnsureBarcodeUniqueAsync(req.Barcode);
 
         var product = new Product
         {

@@ -6,25 +6,20 @@ public class StoreAisleService
 {
     private readonly AppDbContext _db;
     private readonly IMapper _mapper;
+    private readonly StoreGuard _storeGuard;
+    private readonly StoreAisleGuard _storeAisleGuard;
 
-    public StoreAisleService(AppDbContext dbContext, IMapper mapper)
+    public StoreAisleService(AppDbContext dbContext, IMapper mapper, StoreGuard storeGuard, StoreAisleGuard storeAisleGuard)
     {
         _db = dbContext;
         _mapper = mapper;
-    }
-
-    private async Task EnsureStoreExistsAsync(int storeId)
-    {
-        var store = await _db.Stores.FindAsync(storeId);
-        if (store == null)
-        {
-            throw new NotFoundException("Store not found");
-        }
+        _storeGuard = storeGuard;
+        _storeAisleGuard = storeAisleGuard;
     }
 
     public async Task<IEnumerable<StoreAisleResponse>> GetStoreAislesAsync(int storeId)
     {
-        await EnsureStoreExistsAsync(storeId);
+        await _storeGuard.EnsureExistsAsync(storeId);
 
         var storeAisles = await _db.StoreAisles
             .Where(sa => sa.StoreId == storeId)
@@ -35,7 +30,7 @@ public class StoreAisleService
 
     public async Task<StoreAisleResponse> GetStoreAisleAsync(int storeId, int aisleId)
     {
-        await EnsureStoreExistsAsync(storeId);
+        await _storeGuard.EnsureExistsAsync(storeId);
 
         var storeAisle = await _db.StoreAisles
             .Include(sa => sa.StoreProducts)
@@ -53,14 +48,8 @@ public class StoreAisleService
         int storeId,
         CreateStoreAisleRequest req)
     {
-        await EnsureStoreExistsAsync(storeId);
-
-        var existingStoreAisle = await _db.StoreAisles
-            .FirstOrDefaultAsync(sa => sa.StoreId == storeId && sa.Name == req.Name);
-        if (existingStoreAisle != null)
-        {
-            throw new ConflictException("Store aisle with the same name already exists");
-        }
+        await _storeGuard.EnsureExistsAsync(storeId);
+        await _storeAisleGuard.EnsureNameUniqueAsync(storeId, req.Name);
 
         var storeAisle = new StoreAisle
         {

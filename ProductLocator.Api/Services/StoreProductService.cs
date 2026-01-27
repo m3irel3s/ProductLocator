@@ -1,5 +1,4 @@
 using ProductLocator.Api.Data;
-using ProductLocator.Api.Guards;
 
 namespace ProductLocator.Api.Services;
 

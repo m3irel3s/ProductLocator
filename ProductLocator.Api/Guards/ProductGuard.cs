@@ -19,4 +19,13 @@ public sealed class ProductGuard
             throw new NotFoundException("Product not found");
         }
     }
+
+    public async Task EnsureBarcodeUniqueAsync(string barcode)
+    {
+        var exists = await _db.Products.AnyAsync(p => p.Barcode == barcode);
+        if (exists)
+        {
+            throw new ConflictException("Product with the same barcode already exists");
+        }
+    }
 }
