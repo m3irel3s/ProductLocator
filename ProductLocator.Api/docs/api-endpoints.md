@@ -44,7 +44,7 @@
 - 200 → list | 404
 
 **GET** `/api/store/{storeId}/product/{productId}`
-- Validations: store exists | product exists | store product exists
+- Validations: store exists | product exists | aisle exists | store product exists
 - 200 | 404
 
 **POST** `/api/store/{storeId}/product`

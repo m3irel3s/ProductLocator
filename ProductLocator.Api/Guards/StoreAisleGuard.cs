@@ -21,4 +21,13 @@ public sealed class StoreAisleGuard
         }
     }
 
+    public async Task EnsureExistsAsync(int aisleId)
+    {
+        var aisle = await _db.StoreAisles.FindAsync(aisleId);
+        if (aisle == null)
+        {
+            throw new NotFoundException("Store aisle not found");
+        }
+    }
+
 }

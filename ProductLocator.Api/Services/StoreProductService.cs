@@ -9,14 +9,16 @@ public class StoreProductService
     private readonly StoreGuard _storeGuard;
     private readonly ProductGuard _productGuard;
     private readonly StoreProductGuard _storeProductGuard;
+    private readonly StoreAisleGuard _storeAisleGuard;
 
-    public StoreProductService(AppDbContext db, IMapper mapper, StoreGuard storeGuard, ProductGuard productGuard, StoreProductGuard storeProductGuard)
+    public StoreProductService(AppDbContext db, IMapper mapper, StoreGuard storeGuard, ProductGuard productGuard, StoreProductGuard storeProductGuard, StoreAisleGuard storeAisleGuard)
     {
         _db = db;
         _mapper = mapper;
         _storeGuard = storeGuard;
         _productGuard = productGuard;
         _storeProductGuard = storeProductGuard;
+        _storeAisleGuard = storeAisleGuard;
     }
 
     public async Task<IEnumerable<StoreProductResponse>> GetAllStoreProductsAsync(int storeId)
@@ -50,6 +52,7 @@ public class StoreProductService
     {
         await _storeGuard.EnsureExistsAsync(storeId);
         await _productGuard.EnsureExistsAsync(req.ProductId);
+        if (req.AisleId.HasValue) await _storeAisleGuard.EnsureExistsAsync(req.AisleId.Value);
         await _storeProductGuard.EnsureNotExistsAsync(storeId, req.ProductId);
 
         var storeProduct = new StoreProduct
