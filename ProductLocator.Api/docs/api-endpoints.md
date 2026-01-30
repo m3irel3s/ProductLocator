@@ -14,7 +14,7 @@
 
 **GET** `/api/product/{productId}`
 - Validations: product exists
-- 200 → product | 404
+- 200 | 404
 
 **POST** `/api/product`
 - Validations: barcode unique
@@ -41,14 +41,14 @@
 
 **GET** `/api/store/{storeId}/product`
 - Validations: store exists
-- 200 → list | 404
+- 200 → list (can be empty) | 404
 
 **GET** `/api/store/{storeId}/product/{productId}`
-- Validations: store exists | product exists | aisle exists | store product exists
+- Validations: store + product + store product exists
 - 200 | 404
 
 **POST** `/api/store/{storeId}/product`
-- Validations: store + product exist, not duplicate
+- Validations: store + product + aisle exist, not duplicate
 - 201 | 400 | 404 | 409
 
 ---
@@ -60,9 +60,9 @@
 - 200 → list (can be empty) | 404
 
 **GET** `/api/store/{storeId}/aisle/{aisleId}`
-- Validations: store exists | store aisle exists
+- Validations: store + store aisle exists
 - 200 | 404
 
 **POST** `/api/store/{storeId}/aisle`
-- Validations: store exists | aisle name unique per store
+- Validations: store exists + aisle name unique per store
 - 201 | 400 | 409
