@@ -23,17 +23,16 @@ public class StoreAisleTests : IAsyncLifetime
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
-    public async Task Get_store_aisles_returns_404_when_store_missing()
+    public async Task Get_store_aisles_when_store_missing_returns_404()
     {
         var res = await _http.GetAsync("/api/store/99999/aisle");
         Assert.Equal(HttpStatusCode.NotFound, res.StatusCode);
     }
 
     [Fact]
-    public async Task Get_all_store_aisles_returns_empty_when_none()
+    public async Task Get_store_aisles_when_none_returns_200_with_empty_list()
     {
-        var storeId = await _api.CreateStoreAsync("Continente", "Lisboa");
-
+        var storeId = await _api.CreateStoreAsync();
         var res = await _http.GetAsync($"/api/store/{storeId}/aisle");
         Assert.Equal(HttpStatusCode.OK, res.StatusCode);
     }
@@ -50,7 +49,7 @@ public class StoreAisleTests : IAsyncLifetime
     [Fact]
     public async Task Create_and_get_store_aisle_works()
     {
-        var storeId = await _api.CreateStoreAsync("Mercadona", "Porto");
+        var storeId = await _api.CreateStoreAsync();
 
         var StoreAisle = await _http.PostAsJsonAsync($"/api/store/{storeId}/aisle",
             new { name = "Bebidas", maxShelf = 15 });

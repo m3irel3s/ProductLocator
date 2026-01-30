@@ -1,7 +1,9 @@
 using ProductLocator.Api.Services;
 using ProductLocator.Api.Data;
 using ProductLocator.Api.Middleware;
-using ProductLocator.Api.Guards;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,24 @@ builder.Services.AddScoped<StoreAisleGuard>();
 
 builder.Services.AddAutoMapper(typeof(Program));
 
+builder.Services.AddAuthentication("Bearer")
+  .AddJwtBearer("Bearer", o =>
+  {
+      o.TokenValidationParameters = new TokenValidationParameters
+      {
+          ValidateIssuerSigningKey = true,
+          IssuerSigningKey = new SymmetricSecurityKey(
+              Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
+          ),
+          ValidateIssuer = false,
+          ValidateAudience = false
+      };
+  });
+
+builder.Services.AddAuthorization();
+
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -37,10 +57,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseHttpsRedirection();
-
 app.UseExceptionHandler();
-
 app.MapControllers();
 
 app.Run();

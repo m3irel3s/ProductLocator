@@ -24,29 +24,59 @@ public class ProductTests : IAsyncLifetime
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
-    public async Task Get_product_returns_404_when_missing()
+    public async Task Get_all_products_returns_200_with_empty_list()
+    {
+        var get = await _http.GetAsync("/api/product");
+        Assert.Equal(HttpStatusCode.OK, get.StatusCode);
+    }
+
+    [Fact]
+    public async Task Get_product_when_missing_returns_404()
     {
         var res = await _http.GetAsync("/api/product/999999");
         Assert.Equal(HttpStatusCode.NotFound, res.StatusCode);
     }
 
     [Fact]
-    public async Task Create_and_get_product_works()
+    public async Task Get_product_when_exists_returns_200()
     {
-        var productId = await _api.CreateProductAsync("Apple", "9876543210123");
+        var productId = await _api.CreateProductAsync();
 
         var get = await _http.GetAsync("/api/product/" + productId);
         Assert.Equal(HttpStatusCode.OK, get.StatusCode);
     }
 
     [Fact]
-    public async Task Create_product_with_same_barcode_returns_400()
+    public async Task Create_product_returns_201()
     {
-        var productId = await _api.CreateProductAsync("Banana", "1234567890123");
+        var res = await _http.PostAsJsonAsync("/api/product", new
+        {
+            name = "Test Product",
+            barcode = "1234567890"
+        });
 
-        var sameProduct = await _http.PostAsJsonAsync("/api/product",
-            new { name = "Banana 2", barcode = "1234567890123" });
+        Assert.Equal(HttpStatusCode.Created, res.StatusCode);
+    }
+
+    [Fact]
+    public async Task Create_product_with_same_barcode_returns_409()
+    {
+        await _api.CreateProductAsync(name: "Product A", barcode: "123456");
+        var sameProduct = await _http.PostAsJsonAsync("/api/product", new
+        {
+            name = "Product B",
+            barcode = "123456"
+        });
 
         Assert.Equal(HttpStatusCode.Conflict, sameProduct.StatusCode);
+    }
+
+    [Fact]
+    public async Task Create_product_with_wrong_body_returns_400()
+    {
+        var res = await _http.PostAsJsonAsync("/api/product",
+            new { wrong = "data" });
+
+        Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
 }

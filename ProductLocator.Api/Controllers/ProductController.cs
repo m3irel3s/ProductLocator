@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using ProductLocator.Api.Services;
 
 namespace ProductLocator.Api.Controllers;

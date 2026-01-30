@@ -8,8 +8,14 @@ public class ApiClient
     private readonly HttpClient _http;
     public ApiClient(HttpClient http) => _http = http;
 
-    public async Task<int> CreateStoreAsync(string name, string location)
+    private static string Unique(string prefix)
+        => $"{prefix}-{Guid.NewGuid():N}";
+
+    public async Task<int> CreateStoreAsync(string? name = null, string? location = null)
     {
+        name ??= Unique("Store");
+        location ??= "Location";
+
         var res = await _http.PostAsJsonAsync("/api/store", new { name, location });
         if (res.StatusCode != HttpStatusCode.Created)
             throw new Exception(await res.Content.ReadAsStringAsync());
@@ -18,8 +24,11 @@ public class ApiClient
         return store!.Id;
     }
 
-    public async Task<int> CreateProductAsync(string name, string barcode)
+    public async Task<int> CreateProductAsync(string? name = null, string? barcode = null)
     {
+        name ??= Unique("Product");
+        barcode ??= Unique("Barcode");
+
         var res = await _http.PostAsJsonAsync("/api/product", new { name, barcode });
         if (res.StatusCode != HttpStatusCode.Created)
             throw new Exception(await res.Content.ReadAsStringAsync());
@@ -28,8 +37,10 @@ public class ApiClient
         return product!.Id;
     }
 
-    public async Task<int> CreateStoreAisleAsync(int storeId, string name, int maxShelf)
+    public async Task<int> CreateStoreAisleAsync(int storeId, string? name = null, int maxShelf = 10)
     {
+        name ??= Unique("Aisle");
+
         var res = await _http.PostAsJsonAsync($"/api/store/{storeId}/aisle", new { name, maxShelf });
         if (res.StatusCode != HttpStatusCode.Created && res.StatusCode != HttpStatusCode.OK)
             throw new Exception(await res.Content.ReadAsStringAsync());

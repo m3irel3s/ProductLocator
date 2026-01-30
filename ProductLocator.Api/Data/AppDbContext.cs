@@ -23,6 +23,7 @@ public class AppDbContext : DbContext
             e.Property(x => x.Email).IsRequired();
             e.HasIndex(x => x.Email).IsUnique();
             e.Property(x => x.PasswordHash).IsRequired();
+            e.Property(x => x.Username).IsRequired();
             e.Property(x => x.CreatedAt).IsRequired();
             e.Property(x => x.UpdatedAt).IsRequired();
         });
