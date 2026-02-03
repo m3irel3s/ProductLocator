@@ -5,7 +5,6 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<User> Users { get; set; } = null!;
-    public DbSet<UserGlobalRole> UserGlobalRoles { get; set; } = null!;
     public DbSet<Store> Stores { get; set; } = null!;
     public DbSet<StoreMember> StoreMembers { get; set; } = null!;
     public DbSet<Product> Products { get; set; } = null!;
@@ -24,23 +23,9 @@ public class AppDbContext : DbContext
             e.HasIndex(x => x.Email).IsUnique();
             e.Property(x => x.PasswordHash).IsRequired();
             e.Property(x => x.Username).IsRequired();
-            e.Property(x => x.CreatedAt).IsRequired();
-            e.Property(x => x.UpdatedAt).IsRequired();
-        });
-
-        // user global roles
-        modelBuilder.Entity<UserGlobalRole>(e =>
-        {
-            e.ToTable("user_global_roles");
-            e.HasKey(x => new { x.UserId, x.Role });
             e.Property(x => x.Role).IsRequired();
             e.Property(x => x.CreatedAt).IsRequired();
             e.Property(x => x.UpdatedAt).IsRequired();
-
-            e.HasOne(x => x.User)
-                .WithMany()
-                .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // stores
@@ -59,7 +44,6 @@ public class AppDbContext : DbContext
         {
             e.ToTable("store_members");
             e.HasKey(x => new { x.StoreId, x.UserId });
-            e.Property(x => x.Role).IsRequired();
             e.Property(x => x.CreatedAt).IsRequired();
             e.Property(x => x.UpdatedAt).IsRequired();
 

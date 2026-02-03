@@ -13,13 +13,26 @@ public class AuthController : ControllerBase
         _service = service;
     }
 
-    // [HttpPost("register")]
-    // public async Task<IActionResult> Register([FromBody] RegisterRequest request)
-    // {
-    //     var result = await _service.RegisterAsync(request);
-    //     return Ok(result);
-    // }
+    [HttpPost("register")]
+    public async Task<IActionResult> Register(RegisterRequest request)
+    {
+        var registeredUser = await _service.RegisterAsync(request);
+        return CreatedAtAction(nameof(Register), registeredUser);
+    }
 
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(LoginRequest request)
+    {
+        var authenticatedUser = await _service.LoginAsync(request);
+        return Ok(authenticatedUser);
+    }
+
+    
+
+
+    // [HttpPost("refresh")]
+    // [HttpPost("logout")]
+    // [HttpGet("me")]
 
 
 }

@@ -1,4 +1,6 @@
+namespace ProductLocator.Api.Dtos.Auth;
+
 public record LoginResponse(
-    string Token,
-    DateTime ExpiresAt
+    UserSummary User,
+    string AccessToken
 );

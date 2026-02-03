@@ -1,6 +1,6 @@
 namespace ProductLocator.Api.Domain.Enums;
 
-public enum StoreRole
+public enum Role
 {
     Manager = 0,
     Staff = 1

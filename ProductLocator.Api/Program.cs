@@ -3,7 +3,7 @@ using ProductLocator.Api.Data;
 using ProductLocator.Api.Middleware;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using System.Text;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,11 +22,16 @@ builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<StoreService>();
 builder.Services.AddScoped<StoreProductService>();
 builder.Services.AddScoped<StoreAisleService>();
+builder.Services.AddScoped<AuthService>();
 
 builder.Services.AddScoped<StoreGuard>();
 builder.Services.AddScoped<ProductGuard>();
 builder.Services.AddScoped<StoreProductGuard>();
 builder.Services.AddScoped<StoreAisleGuard>();
+builder.Services.AddScoped<UserGuard>();
+builder.Services.AddScoped<PasswordGuard>();
+builder.Services.AddScoped<PasswordHasher>();
+builder.Services.AddScoped<ITokenService, JwtTokenService>();
 
 builder.Services.AddAutoMapper(typeof(Program));
 
