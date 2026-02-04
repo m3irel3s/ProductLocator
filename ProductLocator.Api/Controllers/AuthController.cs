@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using ProductLocator.Api.Services;
+using ProductLocator.Api.Extensions;
 
 namespace ProductLocator.Api.Controllers;
 
@@ -27,12 +29,15 @@ public class AuthController : ControllerBase
         return Ok(authenticatedUser);
     }
 
-    
-
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> Me()
+    {
+        var userId = User.GetUserId();
+        var user = await _service.GetUserByIdAsync(userId);
+        return Ok(user);
+    }
 
     // [HttpPost("refresh")]
     // [HttpPost("logout")]
-    // [HttpGet("me")]
-
-
 }

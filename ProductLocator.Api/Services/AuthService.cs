@@ -64,4 +64,16 @@ public class AuthService
             token
         );
     }
+
+    public async Task<UserSummary> GetUserByIdAsync(int userId)
+    {
+        var user = await _db.Users
+            .FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null)
+        {
+            throw new NotFoundException("User not found.");
+        }
+
+        return _mapper.Map<UserSummary>(user);
+    }
 }

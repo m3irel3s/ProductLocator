@@ -5,6 +5,7 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<User> Users { get; set; } = null!;
+    public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
     public DbSet<Store> Stores { get; set; } = null!;
     public DbSet<StoreMember> StoreMembers { get; set; } = null!;
     public DbSet<Product> Products { get; set; } = null!;
@@ -26,6 +27,33 @@ public class AppDbContext : DbContext
             e.Property(x => x.Role).IsRequired();
             e.Property(x => x.CreatedAt).IsRequired();
             e.Property(x => x.UpdatedAt).IsRequired();
+        });
+
+        // refresh tokens
+        modelBuilder.Entity<RefreshToken>(e =>
+        {
+            e.ToTable("refresh_tokens");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.UserId).IsRequired();
+            e.Property(x => x.TokenHash).IsRequired();
+            e.Property(x => x.ExpiresAt).IsRequired();
+            e.Property(x => x.CreatedAt).IsRequired();
+            e.Property(x => x.RevokedAt).IsRequired(false);
+            e.Property(x => x.ReplacedByTokenId).IsRequired(false);
+
+            e.HasOne(x => x.ReplacedByToken)
+                .WithMany()
+                .HasForeignKey(x => x.ReplacedByTokenId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasIndex(x => x.UserId);
+            e.HasIndex(x => x.TokenHash).IsUnique();
+            e.HasIndex(x => x.ReplacedByTokenId).IsUnique();
         });
 
         // stores
