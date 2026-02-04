@@ -57,11 +57,12 @@ public class AuthService
             throw new UnauthorizedException("Invalid credentials.");
         }
 
-        var token = _tokenService.GenerateAccessToken(user);
+        var (accessToken, refreshToken) = await IssueTokensAsync(user);
 
         return new LoginResponse(
             _mapper.Map<UserSummary>(user),
-            token
+            accessToken,
+            refreshToken
         );
     }
 
@@ -75,5 +76,25 @@ public class AuthService
         }
 
         return _mapper.Map<UserSummary>(user);
+    }
+
+    public async Task<(string accessToken, string refreshToken)> IssueTokensAsync(User user)
+    {
+        var accessToken = _tokenService.GenerateAccessToken(user);
+
+        var refreshPlain = RefreshTokenUtils.GeneratePlainToken();
+        var refreshHash = RefreshTokenUtils.Hash(refreshPlain);
+
+        _db.RefreshTokens.Add(new RefreshToken
+        {
+            UserId = user.Id,
+            TokenHash = refreshHash,
+            ExpiresAt = DateTime.UtcNow.AddDays(30),
+            CreatedAt = DateTime.UtcNow
+        });
+
+        await _db.SaveChangesAsync();
+
+        return (accessToken, refreshPlain);
     }
 }
