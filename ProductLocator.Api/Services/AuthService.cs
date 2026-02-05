@@ -89,12 +89,50 @@ public class AuthService
         {
             UserId = user.Id,
             TokenHash = refreshHash,
-            ExpiresAt = DateTime.UtcNow.AddDays(30),
+            ExpiresAt = DateTime.UtcNow.AddDays(7),
             CreatedAt = DateTime.UtcNow
         });
 
         await _db.SaveChangesAsync();
 
         return (accessToken, refreshPlain);
+    }
+
+    public async Task<RefreshResponse> RefreshAsync(RefreshRequest request)
+    {
+        var refreshHash = RefreshTokenUtils.Hash(request.RefreshToken);
+
+        var storedToken = await _db.RefreshTokens
+            .Include(rt => rt.User)
+            .FirstOrDefaultAsync(rt => rt.TokenHash == refreshHash);
+
+        if (storedToken == null || !storedToken.IsActive)
+        {
+            throw new UnauthorizedException("Invalid or expired refresh token.");
+        }
+
+        var user = storedToken.User;
+
+        var (newAccessToken, newRefreshToken) = await IssueTokensAsync(user);
+
+        storedToken.RevokedAt = DateTime.UtcNow;
+        storedToken.ReplacedByTokenHash = RefreshTokenUtils.Hash(newRefreshToken);
+
+        await _db.SaveChangesAsync();
+
+        return new RefreshResponse(newAccessToken, newRefreshToken);
+    }
+
+    public async Task LogoutAsync(LogoutRequest request)
+    {
+        var refreshHash = RefreshTokenUtils.Hash(request.RefreshToken);
+
+        var storedToken = await _db.RefreshTokens
+            .FirstOrDefaultAsync(rt => rt.TokenHash == refreshHash);
+
+        if (storedToken == null || !storedToken.IsActive) return;
+
+        storedToken.RevokedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
     }
 }

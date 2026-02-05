@@ -39,12 +39,7 @@ public class AppDbContext : DbContext
             e.Property(x => x.ExpiresAt).IsRequired();
             e.Property(x => x.CreatedAt).IsRequired();
             e.Property(x => x.RevokedAt).IsRequired(false);
-            e.Property(x => x.ReplacedByTokenId).IsRequired(false);
-
-            e.HasOne(x => x.ReplacedByToken)
-                .WithMany()
-                .HasForeignKey(x => x.ReplacedByTokenId)
-                .OnDelete(DeleteBehavior.Restrict);
+            e.Property(x => x.ReplacedByTokenHash).IsRequired(false);
 
             e.HasOne(x => x.User)
                 .WithMany()
@@ -53,7 +48,6 @@ public class AppDbContext : DbContext
 
             e.HasIndex(x => x.UserId);
             e.HasIndex(x => x.TokenHash).IsUnique();
-            e.HasIndex(x => x.ReplacedByTokenId).IsUnique();
         });
 
         // stores
@@ -65,6 +59,25 @@ public class AppDbContext : DbContext
             e.Property(x => x.Location).IsRequired();
             e.Property(x => x.CreatedAt).IsRequired();
             e.Property(x => x.UpdatedAt).IsRequired();
+        });
+
+        // store layouts
+        modelBuilder.Entity<StoreLayout>(e =>
+        {
+            e.ToTable("store_layouts");
+            e.HasKey(x => x.StoreId);
+            e.Property(x => x.Width).IsRequired();
+            e.Property(x => x.Height).IsRequired();
+            e.Property(x => x.UpdatedAt).IsRequired();
+
+            e.Property(x => x.ElementsJson)
+                .IsRequired()
+                .HasColumnType("jsonb");
+
+            e.HasOne(x => x.Store)
+                .WithOne(x => x.Layout)
+                .HasForeignKey<StoreLayout>(x => x.StoreId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // store members

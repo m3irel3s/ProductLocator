@@ -14,8 +14,7 @@ public class RefreshToken
 
     public DateTime? RevokedAt { get; set; }
 
-    public int? ReplacedByTokenId { get; set; }
-    public RefreshToken? ReplacedByToken { get; set; }
+    public string? ReplacedByTokenHash { get; set; }
 
     public bool IsActive =>
         RevokedAt == null &&

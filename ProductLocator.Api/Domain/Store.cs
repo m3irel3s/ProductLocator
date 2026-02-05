@@ -12,4 +12,6 @@ public class Store
     public ICollection<StoreMember> StoreMembers { get; set; } = new List<StoreMember>();
     public ICollection<StoreProduct> StoreProducts { get; set; } = new List<StoreProduct>();
     public ICollection<StoreAisle> Aisles { get; set; } = new List<StoreAisle>();
+
+    public StoreLayout? Layout { get; set; }
 }
