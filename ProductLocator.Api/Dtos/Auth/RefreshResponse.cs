@@ -1,0 +1,6 @@
+namespace ProductLocator.Api.Dtos.Auth;
+
+public record RefreshResponse(
+    string AccessToken,
+    string RefreshToken
+);

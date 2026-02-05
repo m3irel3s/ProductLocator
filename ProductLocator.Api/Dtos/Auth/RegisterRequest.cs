@@ -17,6 +17,6 @@ public record RegisterRequest(
     Role Role
 )
 {
-    public string Username { get; init; } = Username.Trim();
+    public string Username { get; init; } = Username.Trim().ToLowerInvariant();
     public string Email { get; init; } = Email.Trim().ToLowerInvariant();
 }

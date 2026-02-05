@@ -5,16 +5,16 @@ public sealed class PasswordGuard
     public static void EnsureStrong(string password)
     {
         if (string.IsNullOrWhiteSpace(password))
-            throw new ValidationException("Password must be at least 8 characters long.");
+            throw new BadRequestException("Password must be at least 8 characters long.");
         if (password.Length < 8)
-            throw new ValidationException("Password must be at least 8 characters long.");
+            throw new BadRequestException("Password must be at least 8 characters long.");
         if (!password.Any(char.IsUpper))
-            throw new ValidationException("Password must contain at least one uppercase letter.");
+            throw new BadRequestException("Password must contain at least one uppercase letter.");
         if (!password.Any(char.IsLower))
-            throw new ValidationException("Password must contain at least one lowercase letter.");
+            throw new BadRequestException("Password must contain at least one lowercase letter.");
         if (!password.Any(char.IsDigit))
-            throw new ValidationException("Password must contain at least one digit.");
+            throw new BadRequestException("Password must contain at least one digit.");
         if (!password.Any(ch => !char.IsLetterOrDigit(ch)))
-            throw new ValidationException("Password must contain at least one special character.");
+            throw new BadRequestException("Password must contain at least one special character.");
     }
 }

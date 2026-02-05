@@ -38,6 +38,13 @@ public class AuthController : ControllerBase
         return Ok(user);
     }
 
-    // [HttpPost("refresh")]
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh(RefreshRequest request)
+    {
+        var refreshedUser = await _service.RefreshAsync(request);
+        return Ok(refreshedUser);
+    }
+
+
     // [HttpPost("logout")]
 }
